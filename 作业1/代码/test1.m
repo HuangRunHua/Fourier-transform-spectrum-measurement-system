@@ -1,0 +1,15 @@
+t=0:0.0001:0.5;
+A1=10;
+A2=20;
+y1=A1*sin(500*t);
+y2=A2*sin(550*t);
+y=y1+y2;
+subplot(3,1,1);
+plot(t,y1,'r.-','LineWidth',0.5);
+title('10*sin(500*t)');
+subplot(3,1,2);
+plot(t,y2,'b.-','LineWidth',0.5);
+title('20*sin(550*t)');
+subplot(3,1,3);
+plot(t,y,'b.-','LineWidth',0.5);
+title('10*sin(500*t)+20*sin(550*t)');
