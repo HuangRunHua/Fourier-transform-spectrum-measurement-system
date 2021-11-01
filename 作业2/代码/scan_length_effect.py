@@ -16,6 +16,13 @@ ax = fig.add_subplot()
 
 num = 200
 
+def fft_convolve(a,b):
+    n = len(a) + len(b) - 1
+    N = 2**(int(np.log2(n))+1)
+    A = fft(a, N)
+    B = fft(b, N)
+    return ifft(A*B)[:n]
+
 # 设置扫描长度(m)
 L = np.linspace(0.0001, 0.02, num)
 
@@ -28,11 +35,11 @@ W =2*np.pi*(1-np.cos(sita1))
 # 设置波长
 lam = 632.8*10**(-9)
 sigma0 = 1/lam
-sigma1_1 = sigma0 - sigma0*W/(50*np.pi)
+sigma1_1 = sigma0 - sigma0*W/(100*np.pi)
 
 sigma = np.arange(sigma0 - 10**5, sigma0 + 10**5, 10)
 
-sigma_jiehe = np.arange(-10**4, 10**4, 0.1)
+sigma_jiehe = np.arange(sigma0 - 10**5, sigma0 + 10**5, 10)
 print("Length of sigma_jiehe = %d" %len(sigma_jiehe))
 
 
@@ -41,15 +48,15 @@ def conv(i,j):
     B1 = np.pi/(sigma0*W)*((sigma>=sigma1_1)&(sigma<=sigma0))
 
     # 扫描长度的影响 
-    Y01 = 2*i*np.sinc(2*np.pi*sigma_jiehe*i) 
+    Y01 = 2*i*np.sinc(2*np.pi*(sigma0-sigma)*i) 
     I1 = np.convolve(B1,Y01,'same') 
     return I1
 
 # 单独考虑扫描长度的影响
 for i in L:
-    ax.plot(sigma_jiehe, conv(i,sita1),'r')
-    plt.xlim(-500,100)
-    plt.ylim(-0.5*10**(-6),3*10**(-6))
+    # ax.plot(sigma_jiehe, conv(i,sita1),'r')
+    ax.plot(sigma_jiehe, fft_convolve(i,sita1),'r')
+    plt.xlim(1.57*10**6, 1.59*10**6)
     print(i)
     title= ax.text(0.5,1.05,"L = {:.4f}m".format(i), 
                     size=plt.rcParams["axes.titlesize"],

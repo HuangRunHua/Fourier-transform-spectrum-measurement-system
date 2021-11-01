@@ -20,7 +20,7 @@ num = 400
 L = 0.02
 
 # 固定发散角
-sita = np.linspace(0.1*np.pi, 0.4*np.pi, num)
+sita = np.linspace(0.1*np.pi, 0.3*np.pi, num)
 
 # 设置波长
 lam = 632.8*10**(-9)
@@ -29,16 +29,19 @@ sigma0 = 1/lam
 
 sigma = np.arange(sigma0 - 10**5, sigma0 + 10**5, 10)
 
-sigma_jiehe = np.arange(-10**4, 10**4, 1)
+# sigma_jiehe = np.arange(-10**4, 10**4, 1)
+sigma_jiehe = np.arange(sigma0-10**5, sigma0+10**5, 10)
 print("Length of sigma_jiehe = %d" %len(sigma_jiehe))
 
 # 扫描长度的影响 
-Y01 = 2*L*np.sinc(2*np.pi*sigma_jiehe*L)
+# Y01 = 2*L*np.sinc(2*np.pi*sigma_jiehe*L)
+# Y01 = 2*L*np.sinc(2*np.pi*(sigma0-sigma_jiehe)*L)
+Y01 = 2*L*np.sinc(2*np.pi*(sigma0-sigma)*L)
 
 def conv(i,j):
     # 设置入射发散角的立体角
     W =2*np.pi*(1-np.cos(j))
-    sigma1_1 = sigma0 - sigma0*W/(50*np.pi)
+    sigma1_1 = sigma0 - sigma0*W/(100*np.pi)
 
     # 入射角的影响
     B1 = np.pi/(sigma0*W)*((sigma>=sigma1_1)&(sigma<=sigma0))
@@ -48,7 +51,7 @@ def conv(i,j):
 # 单独考虑发散角的影响
 for i in sita:
     ax.plot(sigma_jiehe, conv(L, i),'r')
-    plt.xlim(-5000,1000)
+    plt.xlim(1.56*10**6, 1.59*10**6)
     # plt.ylim(-0.5*10**(-6),3*10**(-6))
     print(i)
     title= ax.text(0.5,1.05,"theta = {:.4f} rad".format(i), 
