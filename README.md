@@ -1,5 +1,5 @@
-# Fourier transform spectrum measurement system
- 这是2021级OUC研究生一年级课程--傅立叶变换光谱测量系统的作业。实验报告使用latex书写并转成PDF，实验代码主要使用Python来实现。
+# 傅立叶变换光谱测量系统
+这是2021级OUC研究生一年级课程--傅立叶变换光谱测量系统的作业。实验报告使用latex书写并转成PDF，实验代码主要使用Python来实现。
  
 ### 作业一
 1. 仿真两不同频率正弦波的差拍波形；
