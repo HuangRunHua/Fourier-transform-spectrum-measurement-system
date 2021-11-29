@@ -1,4 +1,5 @@
 # 傅立叶变换光谱测量系统
+![](https://github.com/HuangRunHua/Fourier-transform-spectrum-measurement-system/blob/main/pankaj-patel-_SgRNwAVNKw-unsplash.jpg)
 这是2021级OUC研究生一年级课程--傅立叶变换光谱测量系统的作业。实验报告使用latex书写并转成PDF，实验代码主要使用Python来实现。
  
 ### 作业一
