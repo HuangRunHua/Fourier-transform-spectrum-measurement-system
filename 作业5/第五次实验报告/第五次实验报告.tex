@@ -1,0 +1,686 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{ctex}
+\usepackage{fontspec}
+\usepackage{listings}
+\usepackage{pxfonts}
+% The following code is for matlab language
+\lstset{
+    columns=fixed,     
+    basicstyle = \tt,           % 基本样式 + 小号字体  
+    %numbers=left,    % 在左侧显示行号
+    frame=none,     % 不显示背景边框
+    breaklines = true,                  % 代码过长则换行
+    backgroundcolor=\color[RGB]{245,245,244},  % 设定背景颜色
+    keywordstyle=\color[RGB]{40,40,255},         % 设定关键字颜色
+    % numberstyle=\footnotesize\color{darkgray},    % 设定行号格式
+    commentstyle=\it\color[RGB]{0,96,96},         % 设置代码注释的格式
+    stringstyle=\rmfamily\slshape\color[RGB]{128,0,0},   % 设置字符串格式
+    showstringspaces=false,   % 不显示字符串中的空格
+    language=matlab,             % 设置语言
+    extendedchars=false,
+    %basicstyle=Consolas
+    tabsize=4,
+    upquote=true,
+    %literate={'}{\textquotedb}1
+}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{傅立叶变换光谱测量技术实验报告}
+
+\author{
+    \IEEEauthorblockN{
+        黄润华}
+        \IEEEauthorblockA{
+            \textit{Ocean University of China} \\
+            \textit{email@noreply.com}
+    \and
+    \IEEEauthorblockN{
+        杨超}
+        \IEEEauthorblockA{
+            \textit{Ocean University of China} \\
+            \textit{email@somewhere.com}
+        }
+    }
+}
+
+
+
+
+\maketitle
+
+\begin{abstract}
+    本实验报告为傅立叶变换光谱测量技术第五次实验报告，本报告采用Python仿真同时考虑有限扫描长度和采样间隔误差两因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。实验仿真误差选取是随机、线性或正弦变化的误差，仿真采样间隔为79.1nm。本仿真以632.8nm的HeNe激光和532nm的YAG激光为例。
+\end{abstract}
+
+\begin{IEEEkeywords}
+    Optical spectrum, python, fft
+\end{IEEEkeywords}
+
+\section{实验目的}
+\begin{itemize}
+    \item[1.] 仿真多种正弦形式的扫描长度误差与采样间隔误差同时叠加对傅里叶变换光谱测量曲线的影响；
+    \item[2.] 仿真扫描长度误差与采样间隔误差累积叠加对傅里叶变换光谱测量曲线的影响； 
+\end{itemize} 
+
+\section{实验原理}
+\subsection{分辨率和分辨能力}
+光谱仪的光谱分辨率是其定性区分彼此非常接近的两个光谱峰的能力的量度。 通常，光谱分辨率由仪器线形状（ILS）的半峰全宽（FWHM）表示，光谱仪的输出光谱具有纯单色输入辐射。
+
+光谱分辨率R由下式定义
+\begin{align}
+    R = \frac{\sigma_{max}}{\delta \sigma}
+\end{align}
+其中$\sigma_{max}$是光谱仪设计运行的最大波数。
+
+\subsubsection{分辨率与最大OPD之间的关系}
+根据公式
+\begin{align}
+    B_{c}(\sigma)=B_{r e L}(\sigma)+i B_{i o L}(\sigma)=\int_{-\infty}^{\infty} I(x) \operatorname{rect}(x) e^{-i 2 \pi a x} d x \\
+    \begin{cases}{c}
+        B(\sigma)=2 \mid \int_{-\infty}^{+\infty} I(x) \operatorname{rect}(x) e^{-2 \pi a x} d x \\
+        \phi(\sigma)=\arctan \left[\frac{B_{i o L}(\sigma)}{B_{r e L}(\sigma)}\right]
+    \end{cases} \quad(\sigma \geq 0)
+\end{align}
+其中矩形函数定义为
+\begin{align*}
+    \operatorname{rect}(x)=\begin{cases}
+        1 & |x|<L \\
+        0 & |x|>L
+        \end{cases}
+\end{align*}
+因此，理论上 FTS 的光谱分辨率取决于可移动镜的扫描范围
+\begin{align}
+    B_{e}(\sigma)=\begin{cases}{ll}
+        B(\sigma) / 2 & (\sigma \geq 0) \\
+        B(-\sigma) / 2 & (\sigma \leq 0)
+        \end{cases}
+\end{align}
+理论上，完美单色线的干涉图可以用来描述
+\begin{align}
+    I(x) = 2cos(2\pi \sigma_0 x)
+\end{align}
+将此表达式替换为方程$B(\sigma)$、$\phi(\sigma)$，考虑到实际上$\sigma > 0$，可以得到ILS $B(\sigma)$的表达式：
+\begin{align}
+        B_{I I S}(\sigma)
+        &=2 L\frac{\sin \left[2 \pi\left(\sigma_{0}+\sigma\right) L\right]}{2 \pi\left(\sigma_{0}+\sigma\right) L}+\frac{\sin \left[2 \pi\left(\sigma_{0}-\sigma\right) L\right]}{2 \pi\left(\sigma_{0}-\sigma\right) L} \\
+        & \approx 2 L \times \frac{\sin \left[2 \pi\left(\sigma_{0}-\sigma\right) L\right]}{2 \pi\left(\sigma_{0}-\sigma\right) L}  \\
+        & =2 L \sin c\left[2 \pi\left(\sigma_{0}-\sigma\right) L\right]
+\end{align}
+如图\ref{pic8}所示，光谱从一条线($\delta$ 函数)扩展到 $sin c$ 函数形状(仪器线形)。
+\begin{align}
+    (\delta \sigma)_{linewidth} = \frac{1.21}{2L}
+\end{align}
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{pic8.png}}
+    \caption{$B_{I I S}(\sigma)$}
+    \label{pic8}
+\end{figure}
+
+\subsubsection{分离共振}
+分辨率可以通过分离图\ref{pic9}所示光谱中相同强度(或共振)的两条单色线(波数和)来描述。
+如果两个线峰值之间的下降幅度大于线峰值的 20\%，则可以声称解决了两个共振，此时
+\begin{align}
+    (\delta \sigma)_{separation} = \frac{1.46}{2L}
+\end{align}
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{pic9.png}}
+    \caption{分离共振解析结果}
+    \label{pic9}
+\end{figure}
+
+\subsubsection{瑞利准则}
+瑞利准则分离两个 ILS 的峰值，使得一个共振的最大值落在另一个共振的零点处，因此，仪器线形状决定的分辨率是
+\begin{align}
+    \delta \sigma = \frac{1}{2L}
+\end{align} 
+
+\subsection{分辨率与发散角度之间的关系}
+图\ref{pic10}是迈克尔逊干涉仪的等效图，根据图\ref{pic10}与图\ref{pic11}可以计算出OPD与夹角$\theta$之间的关系
+\begin{align}
+    O P D=2 \times \frac{x / 2}{\cos \theta}-x \tan \theta \sin \theta=x \cos \theta
+\end{align}
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{pic10.png}}
+    \caption{迈克尔逊干涉仪的等效图}
+    \label{pic10}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{pic11.png}}
+    \caption{迈克尔逊干涉仪接收端放大图}
+    \label{pic11}
+\end{figure}
+我们可以得到扩展源的归一化干涉图，对着一个立体角$\Omega_{max}$是
+\begin{align*}
+    I\left(x, \Omega_{\max }\right)=\frac{1}{\Omega_{\max }}\int_{0}^{\infty} B(\sigma) \int_{0}^{\Omega_{\operatorname{mix}}} \cos (2 \pi \sigma x \cos \theta) d \Omega d \sigma
+\end{align*}
+根据立体角的公式，上述式子可以化简为
+\begin{align*}
+    I\left(x, \Omega_{\max }\right)=\int_{0}^{\infty} B(\sigma) sinc \frac{\Omega_{\max } \sigma x }{2}  &\cos [2 \pi \sigma x\\
+    & \;\;\;\;\;\;\;\;\;- \frac{\Omega_{\max } \sigma x }{2}] d \sigma
+\end{align*}
+对于单色光源其满足
+\begin{align*}
+    B(\sigma) = \delta(\sigma-\sigma_0)
+\end{align*}
+其仪器线轮廓可以写为
+\begin{align*}
+    \begin{cases}
+        B_{D i v-1 L S}(\sigma)=[\pi /(\sigma_{0} \Omega_{\max })] \operatorname{rect}(\sigma_{1}, \sigma_{2})\\ \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;+[\pi /(\sigma_{0} \Omega_{\max })] \operatorname{rect}(-\sigma_{2},-\sigma_{1}) \\
+        \sigma_{2}=\sigma_{0}-\sigma_{0} \Omega_{\max } / 2 \pi \\
+        \sigma_{1}=\sigma_{0}
+    \end{cases}
+\end{align*}
+于是可以得到
+\begin{align}
+    &B_{D i v-1 L S}(\sigma)=\left[\pi /\left(\sigma_{0} \Omega_{\max }\right) \operatorname{lrect}\left(\sigma_{1}, \sigma_{2}\right)\right. \\
+    &\bar{\sigma}=\sigma_{0}\left[1-\left(\Omega_{\max } / 4 \pi\right)\right]
+\end{align}
+总的波数差或分辨率是
+\begin{align*}
+    \delta \sigma = \frac{\sigma_0\Omega_{max}}{2\pi}
+\end{align*}
+考虑到可移动镜的扫描长度有限，实际 FTS 的 ILS 应该是
+\begin{align}
+    B_{I L S}(\sigma)=B_{D i v-I L S}(\sigma) * 2 L \sin c[2 \pi \sigma L]
+\end{align}
+其中$L$是可移动镜的最大位移，$*$是卷积算子。
+图\ref{pic11}中两个极端射线的OPD之间的差异公式如下:
+\begin{align*}
+    \Delta O P D=2 L-2 L \cos \theta_{\max } \approx L \theta_{\max }^{2}=L \frac{a^{2}}{ f^{2}}
+\end{align*}
+其中$a$是入口孔径的半径，$f$是准直器的焦距。当$\Delta OPD$等于$\lambda/2$时，两条光线异相，它们之
+间会发生破坏性叠加。对于宽带辐射输入，存在的最短波长决定了 FTS 的$\Delta OPD$的最大有效值， 如下式所示:
+\begin{align}
+    \Delta OPD \leq \frac{\lambda_{min}}{2} = \frac{1}{2\sigma_{max}}
+\end{align}
+我们可以得到 $a$的值应满足以下不等式， 以获得大于$R$的分辨率:
+\begin{align}
+    a \leq \frac{f}{\sqrt{R}}
+\end{align}
+
+
+\subsection{傅里叶变换光谱仪的优点}
+与色散光谱仪相比，FTS具有许多广泛宣传的优点。然而，只有吞吐量（Jacquinot）和多路复用（Felgett）优势是FTS操作原理所固有的，而不是特定的工程设计。
+\subsubsection{吞吐量或Jacquinot优势} 吞吐量优势是FTS可以具有大的圆形入口孔，其面积比分散光谱仪中的狭缝的面积大得多，以获得相同的分辨率。吞吐量 定义为 ,其中 是限制孔径的面积，并且是图\ref{pic12}中所示的准直或聚焦光学器件所对应的立体角。
+
+FTS的最大吞吐量由下式给出
+\begin{align}
+    T_{FTS} = A\Omega_s = \frac{\pi}{R}A_{mirror}
+\end{align}
+其中$A_{mirror}$是镜子的投影面积。
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{pic12.png}}
+    \caption{孔径和立体角的关系图}
+    \label{pic12}
+\end{figure}
+
+对于光栅光谱仪，实现分辨率R的能量吞吐量受其狭缝区域和准直光学系统的限制，并由下式给出：
+\begin{align}
+    T_{grating} = \frac{l}{f_gR}A_{grating}
+\end{align}
+其中$f_g$是准直光学系统的焦距，$l$是狭缝的高度，$A_{grating}$是光栅的投影面积。对于光栅光谱仪，$\frac{l}{f_gR}$小于1/20。
+
+因此，对于相同的分辨率和类似的仪器尺寸，FTS比光栅光谱仪具有高60倍的能量收集能力。 因此，Jacquinot的优势使得FTS更适合于弱信号测量，其中检测器噪声占主导地位，频谱信噪比（SNR）与吞吐量成比例地增加。
+
+\subsubsection{Multiplex或Felgett的优势} 
+多路复用的优点是FTS在扫描周期内同时观察来自给定频谱的整个范围的所有频谱信息。因此，通过使用FTS和使用单色仪可获得的SNR的比率：
+\begin{align}
+    \frac{SNR^S_{FTS}}{SNR_{monochromator}} = N^{\frac{1}{2}}
+\end{align}
+FTS的多重优势仅存在于红外和远红外信号的测量中，并且在可见 - 紫外信号的检测中丢失，因为在红外检测中，与信号电平无关的检测器噪声占主导地位。 量子噪声在可见光 - 紫外信号检测中占主导地位。
+\subsubsection{Connes的优势}
+FTS的波数范围来自He-Ne激光条纹，其作为每次扫描中采样位置的内部参考。 这种激光的波数非常准确，并且非常稳定。 因此，干涉仪的波数校准更精确，并且具有比分散仪器的校准好得多的长期稳定性.
+
+
+\section{实验内容}
+仿真同时考虑有限扫描长度和采样间隔误差两因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。误差可以是随机、线性或正选变化的。以632.8nm的He-Ne激光和532nm的YAG激光为例。（采样间隔为79.1nm）
+
+\begin{figure*}[htbp]
+	\centerline{
+		\includegraphics[width=22cm]{所有波放一起.png} 	
+	}
+	\caption{原始信号的光谱曲线与叠加多种不同频率正弦噪声后光谱曲线的比较}
+	\label{pic7}
+\end{figure*}
+
+\section{实验结果}
+本实验报告以632.8nm的波长为例。
+\subsection{不同频率正弦波噪声的叠加结果}
+图片\ref{pic1}、图\ref{pic2}、图\ref{pic3}与图\ref{pic14}显示了本次仿真的不同频率正弦波噪声，其中图\ref{pic1}为单一频率正弦波噪声叠加后的光谱曲线，图\ref{pic2}为两个不同频率正弦波噪声叠加后的光谱曲线，图\ref{pic3}为三个不同频率正弦波噪声叠加后的光谱曲线，图\ref{pic14}为四个不同频率正弦波噪声叠加后的光谱曲线。从光谱曲线上可以看到，随着叠加的正弦噪声数的增加，光谱曲线的半峰全宽逐渐增大。
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{1种波叠加.png}}
+    \caption{单一频率正弦波噪声叠加后的光谱曲线}
+    \label{pic1}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{2种波叠加.png}}
+    \caption{两个不同频率正弦波噪声叠加后的光谱曲线}
+    \label{pic2}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{3种波叠加.png}}
+    \caption{三个不同频率正弦波噪声叠加后的光谱曲线}
+    \label{pic3}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{4种波叠加.png}}
+    \caption{四个不同频率正弦波噪声叠加后的光谱曲线}
+    \label{pic14}
+\end{figure}
+
+\subsection{噪声累积叠加结果}
+图片\ref{pic21}、图\ref{pic22}、图\ref{pic23}与图\ref{pic24}显示了四种不同幅度值的随机噪声的累积叠加结果。每张图片第一行代表理论扫描距离与叠加多次噪声后的扫描距离的比较，第二行左半部分代表代表未添加累积噪声的光谱曲线图，右半部分代表添加累积随机噪声后的光谱曲线图。
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{随机噪声叠加1.png}}
+    \caption{随机噪声叠加结果1(图片第一行代表理论扫描距离与叠加多次噪声后的扫描距离的比较，第二行左半部分代表代表未添加累积噪声的光谱曲线图，右半部分代表添加累积随机噪声后的光谱曲线图。)}
+    \label{pic21}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{随机噪声叠加2.png}}
+    \caption{随机噪声叠加结果2(图片第一行代表理论扫描距离与叠加多次噪声后的扫描距离的比较，第二行左半部分代表代表未添加累积噪声的光谱曲线图，右半部分代表添加累积随机噪声后的光谱曲线图。)}
+    \label{pic22}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{随机噪声叠加3.png}}
+    \caption{线性噪声叠加结果3(图片第一行代表理论扫描距离与叠加多次噪声后的扫描距离的比较，第二行左半部分代表代表未添加累积噪声的光谱曲线图，右半部分代表添加累积随机噪声后的光谱曲线图。)}
+    \label{pic23}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.5\textwidth]{随机噪声叠加4.png}}
+    \caption{线性噪声叠加结果4(图片第一行代表理论扫描距离与叠加多次噪声后的扫描距离的比较，第二行左半部分代表代表未添加累积噪声的光谱曲线图，右半部分代表添加累积随机噪声后的光谱曲线图。)}
+    \label{pic24}
+\end{figure}
+
+图片\ref{pic21}、图\ref{pic22}、图\ref{pic23}与图\ref{pic24}的结果表明，累积的随机误差会对光谱曲线的分辨率产生巨大的影响，一个极小的随机误差在不断迭代多次后会产生质的飞跃，具体表现在加噪声后的光谱曲线图的半峰全宽相比于原始光谱曲线图的半峰全宽加宽了较为大的范围。同时影响随着随机噪声幅度的增大而逐渐剧烈。
+
+\section{结语}
+本实验完成了利用Python仿真同时考虑有限扫描长度和采样间隔误差两因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。
+
+\appendices
+\section{多个频率的正弦噪声叠加代码}
+\begin{lstlisting}[language=python]
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.fftpack import fft
+from pylab import *
+import matplotlib.gridspec as gridspec
+# 本程序模拟有限扫描长度误差误差影响下的傅里叶变换光谱测量系统的光谱测量曲线
+# 程序具体参数如下：
+#   - 采样间隔选取 79.1nm
+#   - 干涉图波长选取 632.8nm
+#   - 干涉图采样点数选取 2^12（该点数下仿真图像最佳）
+#   - 本实验只叠加一种噪声---正弦噪声
+#       - 频率分别为0.6*10^4, 1*10^4, 2*10^4与4*10^4 rad/s
+#   - 实验目的在于模拟不同周期的正弦噪声同时叠加后对信号的影响
+#   - 分别叠加2种、3种与4种噪声
+def GetFFT(I0, Iw0, n0):
+    Y0 = 2*abs(fft(I0,n0))
+    Y0_max = max(Y0);
+    Y0 = Y0/Y0_max
+    Y0 = Y0[:int(n0/2)]
+
+    Yw0 = 2*abs(fft(Iw0,n0))
+    Yw0_max = max(Yw0);
+    Yw0 = Yw0/Yw0_max
+    Yw0 = Yw0[:int(n0/2)]
+    return Y0, Yw0
+
+# 波长为632.8nm
+laimda0 = 632.8*10**(-9)
+# 79.1nm的采样间隔 
+i = 79.1*10**(-9)
+# 中心点的采样频
+sigma0 = 1/laimda0
+p1 = (-1)*(2**11)*79.1*10**(-9)
+# 2**n个点 
+p2 = (2**11-1)*79.1*10**(-9)
+# 无补零 
+x0 = np.arange(p1, p2, i)
+n0 = n1 = 2**(int(np.log2(len(x0)))+1)
+print("n0 length = %d" %n0)
+
+# 此部分为叠加正弦噪声
+noise_sin1 = laimda0/16*np.sin(2*np.pi*(0.6*10**4)*x0)
+noise_sin2 = laimda0/16*np.sin(2*np.pi*(1*10**4)*x0)
+noise_sin3 = laimda0/16*np.sin(2*np.pi*(2.5*10**4)*x0)
+noise_sin4 = laimda0/16*np.sin(2*np.pi*(4*10**4)*x0)
+
+I0 = np.cos(2*np.pi*sigma0*x0)
+
+I_sin_all_1 = np.cos(2*np.pi*sigma0*(x0 + noise_sin1))
+I_sin_all_2 = np.cos(2*np.pi*sigma0*(x0 + noise_sin1 + noise_sin2))
+I_sin_all_3 = np.cos(2*np.pi*sigma0*(x0 + noise_sin1 + noise_sin2 + noise_sin3))
+I_sin_all_4 = np.cos(2*np.pi*sigma0*(x0 + noise_sin1 + noise_sin2 + noise_sin3 + noise_sin4))
+
+Y0, Y_sine_all_1 = GetFFT(I0, I_sin_all_1, n0)
+Y0, Y_sine_all_2 = GetFFT(I0, I_sin_all_2, n0)
+Y0, Y_sine_all_3 = GetFFT(I0, I_sin_all_3, n0)
+Y0, Y_sine_all_4 = GetFFT(I0, I_sin_all_4, n0)
+
+# 设置频谱图的横坐标
+fs_0 = 1/i*np.arange(n0/2)/n0
+
+best_Y0_average_range = 0.5*np.ones((Y0.size, 1))
+
+# 只叠加一种波
+figure(1)
+gs = gridspec.GridSpec(2, 4)
+gs.update(wspace=0.5, hspace=0.3)
+
+subplot(gs[0, :4])
+sin1, = plt.plot(x0, noise_sin1)
+plt.title("$\omega=0.6x10^4 rad/s$")
+plt.xlim(-0.00006, 0.00006)
+
+subplot(gs[1, 0:2])
+plt.plot(fs_0, Y0, marker='o', ms=5)
+FWHM_original, = plt.plot(fs_0,best_Y0_average_range)
+plt.title("$I_0$ Original spectrum curve")
+plt.legend(handles=[FWHM_original],labels=['$FWHM = 3086.48 m^{-1}$'], loc='upper right')
+plt.xlim(1.50*(10**6), 1.67*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+
+subplot(gs[1, 2:4])
+plt.plot(fs_0, Y_sine_all_1, marker='o', ms=5)
+FWHM_sine_1, = plt.plot(fs_0,best_Y0_average_range)
+plt.title("After imposing sine noise")
+plt.legend(handles=[FWHM_sine_1],labels=['$FWHM = 3118.46 m^{-1}$'], loc='upper right')
+plt.xlim(1.50*(10**6), 1.67*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+
+plt.suptitle("632.8nm - Comparison of the Original Signal and the Signal after Adding Sinusoidal Noise", fontsize = 20)
+
+# 同时叠加两种波
+figure(2)
+gs = gridspec.GridSpec(2, 4)
+gs.update(wspace=0.5, hspace=0.3)
+
+subplot(gs[0, :2])
+sin1, = plt.plot(x0, noise_sin1)
+plt.title("$\omega=0.6x10^4 rad/s$")
+plt.xlim(-0.00006, 0.00006)
+
+subplot(gs[0, 2:4])
+sin2, = plt.plot(x0, noise_sin2)
+plt.title("$\omega=1x10^4 rad/s$")
+plt.xlim(-0.00006, 0.00006)
+
+subplot(gs[1, 0:2])
+plt.plot(fs_0, Y0, marker='o', ms=5)
+FWHM_original, = plt.plot(fs_0,best_Y0_average_range)
+plt.title("$I_0$ Original spectrum curve")
+plt.legend(handles=[FWHM_original],labels=['$FWHM = 3086.48 m^{-1}$'], loc='upper right')
+plt.xlim(1.50*(10**6), 1.67*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+
+subplot(gs[1, 2:4])
+plt.plot(fs_0, Y_sine_all_2, marker='o', ms=5)
+FWHM_sine_2, = plt.plot(fs_0,best_Y0_average_range)
+plt.title("After imposing sine noise")
+plt.legend(handles=[FWHM_sine_2],labels=['$FWHM = 3206.04 m^{-1}$'], loc='upper right')
+plt.xlim(1.50*(10**6), 1.67*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+
+plt.suptitle("632.8nm - Comparison of the Original Signal and the Signal after Adding Sinusoidal Noise", fontsize = 20)
+
+# 同时叠加三种波
+figure(3)
+gs = gridspec.GridSpec(2, 6)
+gs.update(wspace=0.5, hspace=0.3)
+
+subplot(gs[0, :2])
+sin1, = plt.plot(x0, noise_sin1)
+plt.title("$\omega=0.6x10^4 rad/s$")
+plt.xlim(-0.00006, 0.00006)
+
+subplot(gs[0, 2:4])
+sin2, = plt.plot(x0, noise_sin2)
+plt.title("$\omega=1x10^4 rad/s$")
+plt.xlim(-0.00006, 0.00006)
+
+subplot(gs[0, 4:6])
+sin3, = plt.plot(x0, noise_sin3)
+plt.title("$\omega=2.5x10^4 rad/s$")
+plt.xlim(-0.00006, 0.00006)
+
+subplot(gs[1, 0:3])
+plt.plot(fs_0, Y0, marker='o', ms=5)
+FWHM_original, = plt.plot(fs_0,best_Y0_average_range)
+plt.title("$I_0$ Original spectrum curve")
+plt.legend(handles=[FWHM_original],labels=['$FWHM = 3086.48 m^{-1}$'], loc='upper right')
+plt.xlim(1.50*(10**6), 1.67*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+
+subplot(gs[1, 3:6])
+plt.plot(fs_0, Y_sine_all_3, marker='o', ms=5)
+FWHM_sine_3, = plt.plot(fs_0,best_Y0_average_range)
+plt.title("After imposing sine noise")
+plt.legend(handles=[FWHM_sine_3],labels=['$FWHM = 3190.52 m^{-1}$'], loc='upper right')
+plt.xlim(1.50*(10**6), 1.67*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+
+plt.suptitle("632.8nm - Comparison of the Original Signal and the Signal after Adding Sinusoidal Noise", fontsize = 20)
+
+# 同时叠加四种波
+figure(4)
+gs = gridspec.GridSpec(2, 8)
+gs.update(wspace=0.5, hspace=0.3)
+
+subplot(gs[0, :2])
+sin1, = plt.plot(x0, noise_sin1)
+plt.title("$\omega=0.6x10^4 rad/s$")
+plt.xlim(-0.00006, 0.00006)
+
+subplot(gs[0, 2:4])
+sin2, = plt.plot(x0, noise_sin2)
+plt.title("$\omega=1x10^4 rad/s$")
+plt.xlim(-0.00006, 0.00006)
+
+subplot(gs[0, 4:6])
+sin3, = plt.plot(x0, noise_sin3)
+plt.title("$\omega=2.5x10^4 rad/s$")
+plt.xlim(-0.00006, 0.00006)
+
+subplot(gs[0, 6:8])
+sin4, = plt.plot(x0, noise_sin4)
+plt.title("$\omega=4x10^4 rad/s$")
+plt.xlim(-0.00006, 0.00006)
+
+subplot(gs[1, 0:4])
+plt.plot(fs_0, Y0, marker='o', ms=5)
+FWHM_original, = plt.plot(fs_0,best_Y0_average_range)
+plt.title("$I_0$ Original spectrum curve")
+plt.legend(handles=[FWHM_original],labels=['$FWHM = 3086.48 m^{-1}$'], loc='upper right')
+plt.xlim(1.50*(10**6), 1.67*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+
+subplot(gs[1, 4:8])
+plt.plot(fs_0, Y_sine_all_4, marker='o', ms=5)
+FWHM_sine_4, = plt.plot(fs_0,best_Y0_average_range)
+plt.title("After imposing sine noise")
+plt.legend(handles=[FWHM_sine_4],labels=['$FWHM = 3198.12 m^{-1}$'], loc='upper right')
+plt.xlim(1.50*(10**6), 1.67*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+
+plt.suptitle("632.8nm - Comparison of the Original Signal and the Signal after Adding Sinusoidal Noise", fontsize = 20)
+
+# 将所有波形放在一起
+figure(5)
+pic, = plt.plot(fs_0, Y0, marker='o', ms=5)
+pic1, = plt.plot(fs_0, Y_sine_all_1, marker='^', ms=5)
+pic2, = plt.plot(fs_0, Y_sine_all_2, marker='*', ms=5)
+pic3, = plt.plot(fs_0, Y_sine_all_3, marker='.', ms=5)
+pic4, = plt.plot(fs_0, Y_sine_all_4, marker='x', ms=5)
+FWHM_sine_5, = plt.plot(fs_0,best_Y0_average_range, linewidth=3)
+plt.legend(handles=[pic, pic1, pic2, pic3, pic4, FWHM_sine_5],labels=['Original', 'One Sine Noise', 'Two Sine Noise', 'Three Sine Noise', 'Four Sine Noise', 'FWHM'], loc='upper right')
+plt.xlim(1.50*(10**6), 1.67*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+plt.suptitle("632.8nm - Comparison of the Original Signal and the Signal after Adding Sinusoidal Noise", fontsize = 20)
+
+plt.show()
+
+\end{lstlisting}
+
+\section{累加随机噪声代码}
+\begin{lstlisting}[language=python]
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.fftpack import fft
+from pylab import *
+import matplotlib.gridspec as gridspec
+from scipy import signal
+import random
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+# 本程序模拟有限扫描长度误差误差影响下的傅里叶变换光谱测量系统的光谱测量曲线
+# 程序具体参数如下：
+#   - 采样间隔选取 79.1nm
+#   - 干涉图波长选取 632.8nm
+#   - 干涉图采样点数选取 2^12（该点数下仿真图像最佳）
+#   - 本实验只叠加一种噪声---随机噪声 1
+#   - 实验目的在于模拟累积的随机噪声叠加后对信号的影响，同时在此基础上观察扫描长度增加对信号点影响
+
+def GetFFT(I0, Iw0, n0):
+    Y0 = 2*abs(fft(I0,n0))
+    Y0_max = max(Y0);
+    Y0 = Y0/Y0_max
+    Y0 = Y0[:int(n0/2)]
+
+    Yw0 = 2*abs(fft(Iw0,n0))
+    Yw0_max = max(Yw0);
+    Yw0 = Yw0/Yw0_max
+    Yw0 = Yw0[:int(n0/2)]
+    return Y0, Yw0
+
+
+# 波长为632.8nm
+laimda0 = 632.8*10**(-9)
+# 79.1nm的采样间隔 
+i = 79.1*10**(-9)
+# 中心点的采样频
+sigma0 = 1/laimda0
+p1 = (-1)*(2**15)*79.1*10**(-9)
+# 2**n个点 
+p2 = (2**15-1)*79.1*10**(-9)
+# 无补零 
+x0 = np.arange(p1, p2, i)
+x0_error = np.arange(p1, p2, i)
+
+n0 = n1 = 2**(int(np.log2(len(x0)))+1)
+# n0 = len(x0)
+print("n0 length = %d" %n0)
+
+#  此部分为叠加线性噪声
+I0 = np.cos(2*np.pi*sigma0*x0)
+
+print(x0)
+
+for j in range(1, len(x0)):
+    x0_error[j] = x0_error[j-1] + random.uniform(-laimda0/280, laimda0/280) + i
+
+print("--------------------------------------")
+
+print(x0_error)
+
+Iw2 = np.cos(2*np.pi*sigma0*(x0_error))
+
+Y0, Yw2 = GetFFT(I0, Iw2, n0)
+
+# 设置频谱图的横坐标
+fs_2 = 1/i*np.arange(n0/2)/n0
+p_2 = np.arange(len(x0))
+best_Y0_average_range = 0.5*np.ones((Yw2.size, 1))
+
+figure(1)
+ax = plt.subplot(2,1,1)
+axins_plot1, = plt.plot(p_2, x0)
+axins_plot2, = plt.plot(p_2, x0_error)
+plt.title("Real sampling points and after imposing random noise")
+
+plt.legend(handles=[axins_plot1, axins_plot2],labels=['Real sampling points', 'After imposing random noise'], loc='upper left')
+
+# 嵌入绘制局部放大图的坐标系
+axins = inset_axes(ax, width="40%", height="30%",loc='lower left',
+                   bbox_to_anchor=(0.5, 0.1, 1, 1),
+                   bbox_transform=ax.transAxes)
+
+# 在子坐标系中绘制原始数据
+axins.plot(p_2, x0)
+axins.plot(p_2, x0_error)
+
+
+# 设置放大区间
+zone_left = 30050
+zone_right = 30055
+
+# 坐标轴的扩展比例（根据实际数据调整）
+x_ratio = 0.5 # x轴显示范围的扩展比例
+y_ratio = 0.5 # y轴显示范围的扩展比例
+
+# X轴的显示范围
+xlim0 = p_2[zone_left]-(p_2[zone_right]-p_2[zone_left])*x_ratio
+xlim1 = p_2[zone_right]+(p_2[zone_right]-p_2[zone_left])*x_ratio
+
+# Y轴的显示范围
+y = np.hstack((x0[zone_left:zone_right], x0_error[zone_left:zone_right]))
+ylim0 = np.min(y)-(np.max(y)-np.min(y))*y_ratio
+ylim1 = np.max(y)+(np.max(y)-np.min(y))*y_ratio
+
+# 调整子坐标系的显示范围
+axins.set_xlim(xlim0, xlim1)
+axins.set_ylim(ylim0, ylim1)
+
+# 建立父坐标系与子坐标系的连接线
+# loc1 loc2: 坐标系的四个角
+# 1 (右上) 2 (左上) 3(左下) 4(右下)
+mark_inset(ax, axins, loc1=3, loc2=1, fc="none", ec='k', lw=1)
+
+
+
+subplot(2,2,3)
+plt.plot(fs_2, Y0, marker='o', ms=5)
+plt.plot(fs_2,best_Y0_average_range)
+plt.title("$I_0$ Original spectrum curve")
+plt.xlim(1.5758*(10**6), 1.58622*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+
+subplot(2,2,4)
+plt.plot(fs_2, Yw2, marker='o', ms=5)
+plt.plot(fs_2,best_Y0_average_range)
+plt.title("After superimposing random noise")
+plt.xlim(1.5758*(10**6), 1.58622*(10**6))
+plt.xlabel('Wave number ($m^{-1}$)')
+
+
+plt.suptitle("632.8nm - Comparison of the Original Signal and the Signal after Adding Random Noise", fontsize = 20)
+
+plt.show()
+
+\end{lstlisting}
+
+\end{document}
