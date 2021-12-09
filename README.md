@@ -1,5 +1,5 @@
 # 傅立叶变换光谱测量系统
-![](https://github.com/HuangRunHua/Fourier-transform-spectrum-measurement-system/blob/main/pankaj-patel-_SgRNwAVNKw-unsplash.jpg)
+![](https://github.com/HuangRunHua/Fourier-transform-spectrum-measurement-system/blob/main/cover.png)
 这是2021级OUC研究生一年级课程--傅立叶变换光谱测量系统的作业。实验报告使用latex书写并转成PDF，实验代码主要使用Python来实现。
  
 ### 作业一
@@ -18,9 +18,7 @@
 
 ### 作业四
 仿真同时考虑有限扫描长度和采样间隔误差两因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。误差可以是随机、线性或正弦变化的。以632.8nm的HeNe激光和532nm的YAG激光为例为例。采样间隔79.1nm。
-
-### 作业五
-仿真同时考虑有限扫描长度和采样间隔误差两因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。误差可以是随机、线性或正弦变化的。以632.8nm的HeNe激光和532nm的YAG激光为例为例。采样间隔79.1nm。着重考虑如下两种情况：
+> 作业四第三次仿真内容
 - 多种不同频率的正弦波同时叠加后的光谱曲线
 - 不同类型的噪声带来的累积误差对光谱曲线的影响
 
