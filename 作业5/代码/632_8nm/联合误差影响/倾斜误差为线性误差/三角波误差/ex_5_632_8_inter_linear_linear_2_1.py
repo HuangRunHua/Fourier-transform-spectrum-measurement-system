@@ -114,7 +114,6 @@ plt.xlabel('Wave number($m^{-1}$)')
 
 
 subplot(gs[3, :8])
-
 Yw0_pic1, = plt.plot(fs_0, Yw0, marker='o', ms=5)
 Y0_pic1, = plt.plot(fs_0, Y0, marker='o', ms=5)
 bf, = plt.plot(fs_0,best_Y0_average_range)
