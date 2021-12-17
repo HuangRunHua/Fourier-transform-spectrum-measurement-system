@@ -60,7 +60,7 @@
 \maketitle
 
 \begin{abstract}
-    本实验报告为傅立叶变换光谱测量技术第五次实验报告，本报告采用Python仿真动镜倾斜误差因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。误差可以是随机、线性或正弦变化的。以632.8nm的HeNe激光和532nm的VAG激光为例为例。采样间隔79.1nm。本仿真以632.8nm的HeNe激光为例。
+    本实验报告为傅立叶变换光谱测量技术第五次实验报告，本报告采用Python仿真动镜倾斜误差与采样间隔误差两个因素同时影响下的傅里叶变换光谱测量系统的光谱测量曲线。误差可以是随机、线性或正弦变化的。以632.8nm的HeNe激光和532nm的VAG激光为例为例。采样间隔79.1nm。本仿真以632.8nm的HeNe激光为例。
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -69,221 +69,93 @@
 
 \section{实验目的}
 \begin{itemize}
-    \item[1.] 思考并仿真动镜倾斜误差因素对傅里叶变换光谱测量曲线的影响；
-    \item[2.] 学习利用Python仿真不同影响条件下光谱测量曲线。 
+    \item[1.] 思考动镜倾斜误差与采样间隔误差两个因素同时影响下的傅里叶变换光谱测量曲线形状；
+    \item[2.] 学习掌握Python绘图库基础知识。 
 \end{itemize} 
 
 \section{实验原理}
-\subsection{分辨率和分辨能力}
-光谱仪的光谱分辨率是其定性区分彼此非常接近的两个光谱峰的能力的量度。 通常，光谱分辨率由仪器线形状（ILS）的半峰全宽（FWHM）表示，光谱仪的输出光谱具有纯单色输入辐射。
-
-光谱分辨率R由下式定义
+\subsection{单色线的干涉方程}
+理论上单色线的干涉图可以用公式(\ref{eq1})来描述
 \begin{align}
-    R = \frac{\sigma_{max}}{\delta \sigma}
-\end{align}
-其中$\sigma_{max}$是光谱仪设计运行的最大波数。
-
-\subsubsection{分辨率与最大OPD之间的关系}
-根据公式
-\begin{align}
-    B_{c}(\sigma)=B_{r e L}(\sigma)+i B_{i o L}(\sigma)=\int_{-\infty}^{\infty} I(x) \operatorname{rect}(x) e^{-i 2 \pi a x} d x \\
-    \begin{cases}{c}
-        B(\sigma)=2 \mid \int_{-\infty}^{+\infty} I(x) \operatorname{rect}(x) e^{-2 \pi a x} d x \\
-        \phi(\sigma)=\arctan \left[\frac{B_{i o L}(\sigma)}{B_{r e L}(\sigma)}\right]
-    \end{cases} \quad(\sigma \geq 0)
-\end{align}
-其中矩形函数定义为
-\begin{align*}
-    \operatorname{rect}(x)=\begin{cases}
-        1 & |x|<L \\
-        0 & |x|>L
-        \end{cases}
-\end{align*}
-因此，理论上 FTS 的光谱分辨率取决于可移动镜的扫描范围
-\begin{align}
-    B_{e}(\sigma)=\begin{cases}{ll}
-        B(\sigma) / 2 & (\sigma \geq 0) \\
-        B(-\sigma) / 2 & (\sigma \leq 0)
-        \end{cases}
-\end{align}
-理论上，完美单色线的干涉图可以用来描述
-\begin{align}
-    I(x) = 2cos(2\pi \sigma_0 x)
-\end{align}
-将此表达式替换为方程$B(\sigma)$、$\phi(\sigma)$，考虑到实际上$\sigma > 0$，可以得到ILS $B(\sigma)$的表达式：
-\begin{align}
-        B_{I I S}(\sigma)
-        &=2 L\frac{\sin \left[2 \pi\left(\sigma_{0}+\sigma\right) L\right]}{2 \pi\left(\sigma_{0}+\sigma\right) L}+\frac{\sin \left[2 \pi\left(\sigma_{0}-\sigma\right) L\right]}{2 \pi\left(\sigma_{0}-\sigma\right) L} \\
-        & \approx 2 L \times \frac{\sin \left[2 \pi\left(\sigma_{0}-\sigma\right) L\right]}{2 \pi\left(\sigma_{0}-\sigma\right) L}  \\
-        & =2 L \sin c\left[2 \pi\left(\sigma_{0}-\sigma\right) L\right]
-\end{align}
-如图\ref{pic8}所示，光谱从一条线($\delta$ 函数)扩展到 $sin c$ 函数形状(仪器线形)。
-\begin{align}
-    (\delta \sigma)_{linewidth} = \frac{1.21}{2L}
+    I(x) = 2cos(2\pi \sigma_0 x)    \label{eq1}
 \end{align}
 
-\begin{figure}[htbp]
-    \centerline{\includegraphics[width=0.5\textwidth]{pic8.png}}
-    \caption{$B_{I I S}(\sigma)$}
-    \label{pic8}
-\end{figure}
+\subsection{采样间隔误差对干涉方程的影响}
+人为进行动镜的平移过程通常掺杂着过程噪声。过程噪声的形式多种多样，常见的简单过程噪声类型为正弦噪声、随机噪声与线性噪声。然而，外部环境是一个不可预测的变量，在不同时刻的噪声类型通常是不相关且随机的，这种随机性带给光谱测量的影响是复杂性的。在操作不当的情况下，动镜移动的距离受到过程噪声的影响较大时，得到的傅立叶变换光谱测量曲线具备较低的可信度同时带来了阅读上的复杂性。
 
-\subsubsection{分离共振}
-分辨率可以通过分离图\ref{pic9}所示光谱中相同强度(或共振)的两条单色线(波数和)来描述。
-如果两个线峰值之间的下降幅度大于线峰值的 20\%，则可以声称解决了两个共振，此时
+动镜移动时过程噪声带来的采样间隔误差是不可避免的，采样间隔误差的直接影响主要体现在对公式(\ref{eq1})中扫描长度$x$的影响:
 \begin{align}
-    (\delta \sigma)_{separation} = \frac{1.46}{2L}
+    I(x) = cos(2\pi\sigma_0(x + \varepsilon_s)) \label{eq9}
 \end{align}
 
-\begin{figure}[htbp]
-    \centerline{\includegraphics[width=0.5\textwidth]{pic9.png}}
-    \caption{分离共振解析结果}
-    \label{pic9}
-\end{figure}
+采样过程通常会选取$2^{12}$到$2^{20}$个采样点，每次采样均有可能存在一定的采样误差，采样误差经过多次迭代后对最终傅立叶光谱测量曲线带来的影响是可观且巨大的。
 
-\subsubsection{瑞利准则}
-瑞利准则分离两个 ILS 的峰值，使得一个共振的最大值落在另一个共振的零点处，因此，仪器线形状决定的分辨率是
-\begin{align}
-    \delta \sigma = \frac{1}{2L}
-\end{align} 
+本次仿真模拟的采样间隔误差均为简单采样间隔误差，即代表每次采样时的误差类型为单一的正弦噪声误差、随机噪声误差或线性噪声误差。同时假设采样过程均为独立事件，前后采样过程噪声互不相干且独立。
 
-\subsection{分辨率与发散角度之间的关系}
-图\ref{pic10}是迈克尔逊干涉仪的等效图，根据图\ref{pic10}与图\ref{pic11}可以计算出OPD与夹角$\theta$之间的关系
+正弦形式的采样间隔误差表达式如下：
 \begin{align}
-    O P D=2 \times \frac{x / 2}{\cos \theta}-x \tan \theta \sin \theta=x \cos \theta
+    \varepsilon_s = \frac{\lambda_0}{16}sin(2\pi\sigma_{\varepsilon}x)  \label{eq2}
+\end{align}
+其中波数(Wave number)数值为$\sigma_{\varepsilon} = 0.4\times10^4 m^{-1}$。
+
+随机形式的采样间隔误差表达式可以采用均匀分布来表示：
+\begin{align}
+    \varepsilon_s \sim U(-\frac{\lambda_0}{5}, \frac{\lambda_0}{5})   \label{eq3}
 \end{align}
 
-\begin{figure}[htbp]
-    \centerline{\includegraphics[width=0.5\textwidth]{pic10.png}}
-    \caption{迈克尔逊干涉仪的等效图}
-    \label{pic10}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centerline{\includegraphics[width=0.5\textwidth]{pic11.png}}
-    \caption{迈克尔逊干涉仪接收端放大图}
-    \label{pic11}
-\end{figure}
-我们可以得到扩展源的归一化干涉图，对着一个立体角$\Omega_{max}$是
-\begin{align*}
-    I\left(x, \Omega_{\max }\right)=\frac{1}{\Omega_{\max }}\int_{0}^{\infty} B(\sigma) \int_{0}^{\Omega_{\operatorname{mix}}} \cos (2 \pi \sigma x \cos \theta) d \Omega d \sigma
-\end{align*}
-根据立体角的公式，上述式子可以化简为
-\begin{align*}
-    I\left(x, \Omega_{\max }\right)=\int_{0}^{\infty} B(\sigma) sinc \frac{\Omega_{\max } \sigma x }{2}  &\cos [2 \pi \sigma x\\
-    & \;\;\;\;\;\;\;\;\;- \frac{\Omega_{\max } \sigma x }{2}] d \sigma
-\end{align*}
-对于单色光源其满足
-\begin{align*}
-    B(\sigma) = \delta(\sigma-\sigma_0)
-\end{align*}
-其仪器线轮廓可以写为
-\begin{align*}
-    \begin{cases}
-        B_{D i v-1 L S}(\sigma)=[\pi /(\sigma_{0} \Omega_{\max })] \operatorname{rect}(\sigma_{1}, \sigma_{2})\\ \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;+[\pi /(\sigma_{0} \Omega_{\max })] \operatorname{rect}(-\sigma_{2},-\sigma_{1}) \\
-        \sigma_{2}=\sigma_{0}-\sigma_{0} \Omega_{\max } / 2 \pi \\
-        \sigma_{1}=\sigma_{0}
-    \end{cases}
-\end{align*}
-于是可以得到
+线性形式的采样间隔误差表达式可以用正比例函数来表示：
 \begin{align}
-    &B_{D i v-1 L S}(\sigma)=\left[\pi /\left(\sigma_{0} \Omega_{\max }\right) \operatorname{lrect}\left(\sigma_{1}, \sigma_{2}\right)\right. \\
-    &\bar{\sigma}=\sigma_{0}\left[1-\left(\Omega_{\max } / 4 \pi\right)\right]
-\end{align}
-总的波数差或分辨率是
-\begin{align*}
-    \delta \sigma = \frac{\sigma_0\Omega_{max}}{2\pi}
-\end{align*}
-考虑到可移动镜的扫描长度有限，实际 FTS 的 ILS 应该是
-\begin{align}
-    B_{I L S}(\sigma)=B_{D i v-I L S}(\sigma) * 2 L \sin c[2 \pi \sigma L]
-\end{align}
-其中$L$是可移动镜的最大位移，$*$是卷积算子。
-图\ref{pic11}中两个极端射线的OPD之间的差异公式如下:
-\begin{align*}
-    \Delta O P D=2 L-2 L \cos \theta_{\max } \approx L \theta_{\max }^{2}=L \frac{a^{2}}{ f^{2}}
-\end{align*}
-其中$a$是入口孔径的半径，$f$是准直器的焦距。当$\Delta OPD$等于$\lambda/2$时，两条光线异相，它们之
-间会发生破坏性叠加。对于宽带辐射输入，存在的最短波长决定了 FTS 的$\Delta OPD$的最大有效值， 如下式所示:
-\begin{align}
-    \Delta OPD \leq \frac{\lambda_{min}}{2} = \frac{1}{2\sigma_{max}}
-\end{align}
-我们可以得到 $a$的值应满足以下不等式， 以获得大于$R$的分辨率:
-\begin{align}
-    a \leq \frac{f}{\sqrt{R}}
+    \varepsilon_s(k) = k, \;\;\; k \in [0, \;79.1\times10^9 m] \label{eq4}
 \end{align}
 
-
-\subsection{傅里叶变换光谱仪的优点}
-与色散光谱仪相比，FTS具有许多广泛宣传的优点。然而，只有吞吐量（Jacquinot）和多路复用（Felgett）优势是FTS操作原理所固有的，而不是特定的工程设计。
-\subsubsection{吞吐量或Jacquinot优势} 吞吐量优势是FTS可以具有大的圆形入口孔，其面积比分散光谱仪中的狭缝的面积大得多，以获得相同的分辨率。吞吐量 定义为 ,其中 是限制孔径的面积，并且是图\ref{pic12}中所示的准直或聚焦光学器件所对应的立体角。
-
-FTS的最大吞吐量由下式给出
+\subsection{动镜倾斜误差对干涉方程的影响}
+动镜倾斜误差带来的影响从干涉图上看为在干涉图上添加一个特定的噪声：
 \begin{align}
-    T_{FTS} = A\Omega_s = \frac{\pi}{R}A_{mirror}
+    I = cos(2\pi\sigma_0x) + \varepsilon_m \label{eq5}
 \end{align}
-其中$A_{mirror}$是镜子的投影面积。
 
-\begin{figure}[htbp]
-    \centerline{\includegraphics[width=0.5\textwidth]{pic12.png}}
-    \caption{孔径和立体角的关系图}
-    \label{pic12}
-\end{figure}
+本次仿真模拟的动镜倾斜误差均为简单动镜倾斜误差，即代表动镜倾斜误差类型为单一的正弦噪声误差、随机噪声误差或线性噪声误差。
 
-对于光栅光谱仪，实现分辨率R的能量吞吐量受其狭缝区域和准直光学系统的限制，并由下式给出：
+正弦形式的动镜倾斜误差表达式如下：
 \begin{align}
-    T_{grating} = \frac{l}{f_gR}A_{grating}
+    \varepsilon_m = sin(2\pi\frac{\sigma_0}{16}x)  \label{eq6}
 \end{align}
-其中$f_g$是准直光学系统的焦距，$l$是狭缝的高度，$A_{grating}$是光栅的投影面积。对于光栅光谱仪，$\frac{l}{f_gR}$小于1/20。
 
-因此，对于相同的分辨率和类似的仪器尺寸，FTS比光栅光谱仪具有高60倍的能量收集能力。 因此，Jacquinot的优势使得FTS更适合于弱信号测量，其中检测器噪声占主导地位，频谱信噪比（SNR）与吞吐量成比例地增加。
-
-\subsubsection{Multiplex或Felgett的优势} 
-多路复用的优点是FTS在扫描周期内同时观察来自给定频谱的整个范围的所有频谱信息。因此，通过使用FTS和使用单色仪可获得的SNR的比率：
+随机形式的动镜倾斜误差表达式可以采用均匀分布来表示：
 \begin{align}
-    \frac{SNR^S_{FTS}}{SNR_{monochromator}} = N^{\frac{1}{2}}
+    \varepsilon_m \sim U(-1, \; 1)   \label{eq7}
 \end{align}
-FTS的多重优势仅存在于红外和远红外信号的测量中，并且在可见 - 紫外信号的检测中丢失，因为在红外检测中，与信号电平无关的检测器噪声占主导地位。 量子噪声在可见光 - 紫外信号检测中占主导地位。
-\subsubsection{Connes的优势}
-FTS的波数范围来自He-Ne激光条纹，其作为每次扫描中采样位置的内部参考。 这种激光的波数非常准确，并且非常稳定。 因此，干涉仪的波数校准更精确，并且具有比分散仪器的校准好得多的长期稳定性.
 
+线性形式的动镜倾斜误差表达式可以用正比例函数来表示：
+\begin{align}
+    \varepsilon_m(k) = k, \;\;\; k \in [0, 1] \label{eq8}
+\end{align}
+
+\subsection{综合误差对干涉方程的影响}
+由式(\ref{eq9})与式(\ref{eq5})可以得到采样干涉误差与动镜倾斜误差两因素同时影响下的干涉图方程：
+\begin{align}
+    I = cos\left[2\pi\sigma_0(x + \varepsilon_s)\right] + \varepsilon_m    \label{eq11}
+\end{align}
 
 \section{实验内容}
 仿真动镜倾斜误差因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。误差可以是随机、线性或正弦变化的。以632.8nm的HeNe激光和532nm的VAG激光为例为例。采样间隔 79.1nm。
 
-\begin{figure*}[htbp]
-	\centerline{
-		\includegraphics[width=22cm]{all.png} 	
-	}
-	\caption{随机噪声形式的误差对光谱曲线的影响}
-	\label{pic7}
-\end{figure*}
+% \begin{figure*}[htbp]
+% 	\centerline{
+% 		\includegraphics[width=22cm]{all.png} 	
+% 	}
+% 	\caption{随机噪声形式的误差对光谱曲线的影响}
+% 	\label{pic7}
+% \end{figure*}
 
 \section{实验结果}
 本实验报告以632.8nm的波长为例。
-\subsection{三种不同的叠加噪声}
-图片\ref{pic1}、图\ref{pic2}与图\ref{pic3}显示了本次仿真的三种不同的叠加噪声，其中图\ref{pic1}为叠加的正弦噪声，图\ref{pic2}为叠加的随机噪声，图\ref{pic3}为叠加的线性噪声。
 
-\begin{figure}[htbp]
-    \centerline{\includegraphics[width=0.5\textwidth]{6.png}}
-    \caption{叠加的正弦噪声}
-    \label{pic1}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centerline{\includegraphics[width=0.5\textwidth]{2.png}}
-    \caption{叠加的随机噪声}
-    \label{pic2}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centerline{\includegraphics[width=0.5\textwidth]{9.png}}
-    \caption{叠加的线性噪声}
-    \label{pic3}
-\end{figure}
-
-
-通过图片\ref{pic1}、图\ref{pic2}与图\ref{pic3}可以看到，动镜倾斜误差因素对光谱曲线的影响较小，甚至可以忽略不计。
+% \begin{figure}[htbp]
+%     \centerline{\includegraphics[width=0.5\textwidth]{6.png}}
+%     \caption{叠加的正弦噪声}
+%     \label{pic1}
+% \end{figure}
 
 \section{结语}
 本实验完成了利用Python仿真动镜倾斜误差因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。
