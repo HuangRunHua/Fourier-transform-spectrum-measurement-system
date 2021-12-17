@@ -48,8 +48,8 @@ fs_0 = 1/i*np.arange(n0/2)/n0
 #####################################################################################
 #  此部分为叠加随机噪声
 #####################################################################################
-# noise_rand = [random.uniform(-1, 1) for _ in range(len(x0))]
-noise_rand = [random.uniform(0, 1) for _ in range(len(x0))]
+noise_rand = [random.uniform(-1, 1) for _ in range(len(x0))]
+# noise_rand = [random.uniform(0, 1) for _ in range(len(x0))]
 
 Iw1 = I0 + noise_rand
 
@@ -67,7 +67,7 @@ gs.update(wspace=0.5, hspace=0.5)
 
 subplot(gs[0, 0:3])
 s1, = plt.plot(x0, I0)
-plt.legend(handles=[s1],labels=['Sample number = $2^{15}$'], loc='upper right')
+plt.legend(handles=[s1],labels=['Sample number = $2^{12}$'], loc='upper right')
 plt.xlim(-6*(10**(-6)), 6*(10**(-6)))
 plt.title("$I_0$ Original Interferogram")
 
