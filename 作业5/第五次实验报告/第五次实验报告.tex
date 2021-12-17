@@ -138,128 +138,79 @@
 \end{align}
 
 \section{实验内容}
-仿真动镜倾斜误差因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。误差可以是随机、线性或正弦变化的。以632.8nm的HeNe激光和532nm的VAG激光为例为例。采样间隔 79.1nm。
-
-% \begin{figure*}[htbp]
-% 	\centerline{
-% 		\includegraphics[width=22cm]{all.png} 	
-% 	}
-% 	\caption{随机噪声形式的误差对光谱曲线的影响}
-% 	\label{pic7}
-% \end{figure*}
+仿真动镜倾斜误差因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。误差形式分别为随机误差、线性误差或正弦变化的误差。以632.8nm的HeNe激光和532nm的VAG激光为例。采样间隔选取79.1nm。
 
 \section{实验结果}
-本实验报告以632.8nm的波长为例。
+本实验报告的分析以632.8nm的波长为例。
 
-% \begin{figure}[htbp]
-%     \centerline{\includegraphics[width=0.5\textwidth]{6.png}}
-%     \caption{叠加的正弦噪声}
-%     \label{pic1}
-% \end{figure}
+\subsection{动镜倾斜误差对光谱曲线的影响}
+
+\begin{figure}[htbp]
+	\centerline{
+		\includegraphics[width=10cm]{1.png} 	
+	}
+	\caption{正弦形式的动镜倾斜误差对光谱曲线的影响}
+	\label{pic1}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centerline{
+		\includegraphics[width=10cm]{2.png} 	
+	}
+	\caption{随机形式的动镜倾斜误差对光谱曲线的影响}
+	\label{pic2}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centerline{
+		\includegraphics[width=10cm]{3.png} 	
+	}
+	\caption{线性形式的动镜倾斜误差对光谱曲线的影响}
+	\label{pic3}
+\end{figure}
+
+图\ref{pic1}、图\ref{pic2}与图\ref{pic3}分别显示了动镜倾斜误差形式为正弦形式、随机形式与线性形式时的干涉图与傅里叶变换后的光谱测量曲线。每张图第一行表示原始未叠加动镜倾斜误差时候的干涉图与傅里叶变换光谱测量曲线，第二行展示了叠加对应的动镜倾斜误差干涉图与傅里叶变换光谱测量曲线，图片第三行为叠加动镜倾斜误差前后傅里叶变换光谱测量曲线的比较。
+
+通过仿真结果可以看出，正弦形式的动镜倾斜误差会使得干涉图整体包络沿着噪声的轨迹变换，同时正弦形式的动镜倾斜误差会在中心波数旁产生一个峰（旁瓣），但对主峰的半峰全宽影响较小，可以忽略不计。
+
+随机形式的动镜倾斜误差对原始干涉图的影响较大，叠加动镜倾斜误差后，干涉图出现参差不齐杂乱无章的现象。由于随机形式的动镜倾斜误差均值为零，因此实际傅立叶变换后的光谱测量曲线在波数为零处没有幅值（即叠加噪声后的干涉图没有直流量）。从图片上进一步分析可以得到随机形式的动镜倾斜误差对傅里叶变换光谱测量曲线主峰的半峰全宽影响较小，但主峰旁的旁瓣出现了毛刺现象。
+
+线性形式的动镜倾斜误差使得原始干涉图的包络按照误差曲线的形式变化。从频谱角度分析，线性形式的动镜倾斜误差对原始单色光主峰的半峰全宽影响较小，可以忽略不计，但由于引入了直流分量使得傅里叶变换光谱测量曲线在主峰附近出现了侧峰。
+
+\subsection{联合误差对光谱曲线的影响}
+\begin{figure}[htbp]
+	\centerline{
+		\includegraphics[width=10cm]{4.png} 	
+	}
+	\caption{正弦形式的动镜倾斜误差与线性形式的采样间隔误差同时作用后的傅立叶变换光谱测量曲线}
+	\label{pic4}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centerline{
+		\includegraphics[width=10cm]{5.png} 	
+	}
+	\caption{随机形式的动镜倾斜误差与线性形式的采样间隔误差同时作用后的傅立叶变换光谱测量曲线}
+	\label{pic5}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centerline{
+		\includegraphics[width=10cm]{6.png} 	
+	}
+	\caption{线性形式的动镜倾斜误差与正弦形式的采样间隔误差同时作用后的傅立叶变换光谱测量曲线}
+	\label{pic6}
+\end{figure}
+
+图\ref{pic4}、图\ref{pic5}与图\ref{pic6}分别显示了同时叠加动镜倾斜误差与采样间隔误差时的干涉图与傅里叶变换后的光谱测量曲线。每张图第一行表示叠加的动镜倾斜误差与采样间隔误差的类型，左半部分为动镜倾斜误差的变换曲线，右半部分为叠加的采样间隔误差。第二行表示原始未叠加动镜倾斜误差时候的干涉图与傅里叶变换光谱测量曲线。第三行展示了叠加对应的动镜倾斜误差干涉图与傅里叶变换光谱测量曲线。图片第四行为叠加动镜倾斜误差前后傅里叶变换光谱测量曲线的比较。
+
+图\ref{pic4}显示了正弦形式的动镜倾斜误差与线性形式的采样间隔误差同时作用后的傅立叶变换光谱测量曲线结果。可以看到，叠加联合噪声后的干涉图包络按照动镜倾斜误差的形式变化。同时，叠加联合噪声后的光谱测量曲线的主峰幅度有一定的下降，主峰峰值的下降导致了主峰半峰全宽的增加，光谱测量曲线还出现了侧峰的现象。
+
+图\ref{pic5}显示了随机形式的动镜倾斜误差与线性形式的采样间隔误差同时作用后的傅立叶变换光谱测量曲线结果。可以看到，叠加联合噪声后的干涉图包络按照动镜倾斜误差的形式变化。叠加联合噪声后的光谱测量曲线的主峰幅度没有出现峰值下降的现象，但由于存在线性形式的采样间隔误差导致了主峰半峰全宽的增加，光谱测量曲线并没有出现侧峰的现象。
+
+图\ref{pic6}显示了线性形式的动镜倾斜误差与正弦形式的采样间隔误差同时作用后的傅立叶变换光谱测量曲线结果。可以看到，叠加联合噪声后的干涉图包络按照动镜倾斜误差的形式变化。叠加联合噪声后的光谱测量曲线的主峰幅度出现峰值下降的现象，但由于存在线性形式的动镜倾斜误差导致了主峰出现侧峰的现象，同时由于正弦形式的采样间隔误差导致了光谱测量曲线的主峰出现半峰全宽变宽的现象。
 
 \section{结语}
-本实验完成了利用Python仿真动镜倾斜误差因素影响下的傅里叶变换光谱测量系统的光谱测量曲线。
-
-\appendix[实验代码（以随机误差噪声为例）]
-\begin{lstlisting}[language=python]
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.fftpack import fft
-from pylab import *
-import random
-import matplotlib.gridspec as gridspec
-
-# 本程序模拟动镜倾斜误差影响下的傅里叶变换光谱测量系统的光谱测量曲线
-# 程序具体参数如下：
-#   - 采样间隔选取 79.1nm
-#   - 干涉图波长选取 632.8nm
-#   - 干涉图采样点数选取 2^15
-#   - 本程序只叠加一种噪声----随机噪声
-
-def GetFFT(I0, Iw0, n0):
-    Y0 = 2*abs(fft(I0,n0))
-    Y0_max = max(Y0);
-    Y0 = Y0/Y0_max
-    Y0 = Y0[:int(n0/2)]
-
-    Yw0 = 2*abs(fft(Iw0,n0))
-    Yw0_max = max(Yw0);
-    Yw0 = Yw0/Yw0_max
-    Yw0 = Yw0[:int(n0/2)]
-    return Y0, Yw0
-
-# 波长为632.8nm
-laimda0 = 632.8*10**(-9)
-# 79.1nm的采样间隔 
-i = 79.1*10**(-9)
-# 中心点的采样频
-sigma0 = 1/laimda0
-p1 = (-1)*(2**14)*79.1*10**(-9)
-# 2**n个点 
-p2 = (2**14-1)*79.1*10**(-9)
-# 无补零 
-x0 = np.arange(p1, p2, i)
-n0 = n1 = 2**(int(np.log2(len(x0)))+1)
-print("n0 length = %d" %n0)
-
-I0 = np.cos(2*np.pi*sigma0*x0)
-
-# 设置频谱图的横坐标
-fs_0 = 1/i*np.arange(n0/2)/n0
-
-#  此部分为叠加随机噪声
-noise_rand = [random.uniform(-1, 1) for _ in range(len(x0))]
-# noise_rand = [random.uniform(0, laimda0/5) for _ in range(len(x0))]
-
-Iw1 = I0 + noise_rand
-
-Y0, Yw1 = GetFFT(I0, Iw1, n0)
-
-# 设置频谱图的横坐标
-fs_1 = 1/i*np.arange(n0/2)/n0
-
-best_Y0_average_range = 0.5*np.ones((Yw1.size, 1))
-
-figure(1)
-
-gs = gridspec.GridSpec(3, 6)
-gs.update(wspace=0.5, hspace=0.3)
-
-subplot(gs[0, :6])
-plt.plot(x0, noise_rand)
-plt.xlim(-0.00005, 0.00005)
-plt.title("Waveform of random noise")
-
-subplot(gs[1, 0:3])
-s1, = plt.plot(x0, I0)
-plt.legend(handles=[s1],labels=['Sample number = $2^{15}$'], loc='upper right')
-plt.xlim(-6*(10**(-6)), 6*(10**(-6)))
-plt.title("$I_0$ Original Interferogram")
-
-
-subplot(gs[1, 3:6])
-s1, = plt.plot(fs_1, Y0, marker='o', ms=5)
-p1, = plt.plot(fs_0,best_Y0_average_range)
-plt.legend(handles=[p1],labels=['FWHM = 385.8 $m^{-1}$'], loc='upper right')
-plt.title("$I_0$ Original spectrum curve")
-plt.xlim(1.5758*(10**6), 1.58622*(10**6))
-
-subplot(gs[2, 0:3])
-plt.plot(x0, Iw1)
-plt.xlim(-6*(10**(-6)), 6*(10**(-6)))
-plt.title("Interferogram of $I_0$ after superimposing random noise")
-
-subplot(gs[2, 3:6])
-plt.plot(fs_1, Yw1, marker='o', ms=5)
-p2, = plt.plot(fs_0,best_Y0_average_range)
-plt.legend(handles=[p2],labels=['FWHM = 386.9 $m^{-1}$'], loc='upper right')
-plt.title("After superimposing random noise")
-plt.xlim(1.5758*(10**6), 1.58622*(10**6))
-
-plt.suptitle("632.8nm - Comparison of the original signal and the signal after adding random noise", fontsize = 20)
-
-plt.show()
-
-\end{lstlisting}
+本实验完成了利用Python仿真动镜倾斜误差与采样间隔误差两个因素同时影响下的傅里叶变换光谱测量系统的光谱测量曲线。
 
 \end{document}
