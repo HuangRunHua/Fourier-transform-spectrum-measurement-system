@@ -41,9 +41,6 @@ x0 = np.arange(p1, p2, i)
 n0 = n1 = 2**(int(np.log2(len(x0)))+1)
 print("n0 length = %d" %n0)
 
-######################################################
-#  此部分为叠加正弦噪声
-######################################################
 noise_sin1 = linspace(0,1,len(x0))
 # noise_sin1 = np.sin(2*np.pi*sigma0/8*x0)
 # noise_sin1 = np.sin(2*np.pi*sigma0/4*x0)
